@@ -2063,12 +2063,14 @@ wifi_error wifi_trigger_subsystem_restart(wifi_handle handle)
     strncpy(error_str, "WIFI_SUCCESS", sizeof(error_str));
 
 exit:
-    if (info->restart_handler.on_subsystem_restart) {
-        ALOGI("Trigger ssr handler registered handler:%p",
-            info->restart_handler.on_subsystem_restart);
-        (info->restart_handler.on_subsystem_restart)(error_str);
-    } else {
-        ALOGI("No trigger ssr handler registered");
+    if (result == WIFI_SUCCESS) {
+        if (info->restart_handler.on_subsystem_restart) {
+            ALOGI("Trigger ssr handler registered handler:%p",
+                info->restart_handler.on_subsystem_restart);
+            (info->restart_handler.on_subsystem_restart)(error_str);
+        } else {
+            ALOGI("No trigger ssr handler registered");
+        }
     }
 
     return result;
