@@ -96,6 +96,7 @@ static wifi_error wifi_get_usable_channels(wifi_handle handle, u32 band_mask, u3
 		u32 filter_mask, u32 max_size, u32* size, wifi_usable_channel* channels);
 static wifi_error wifi_get_supported_radio_combinations_matrix(wifi_handle handle,
 		u32 max_size, u32* size, wifi_radio_combination_matrix *radio_combination_matrix);
+static wifi_error wifi_set_indoor_state(wifi_handle handle, bool isIndoor);
 
 static void wifi_cleanup_dynamic_ifaces(wifi_handle handle);
 typedef enum wifi_attr {
@@ -114,6 +115,7 @@ typedef enum wifi_attr {
     ANDR_WIFI_ATTRIBUTE_THERMAL_COMPLETION_WINDOW  = 12,
     ANDR_WIFI_ATTRIBUTE_VOIP_MODE                  = 13,
     ANDR_WIFI_ATTRIBUTE_DTIM_MULTIPLIER            = 14,
+    ANDR_WIFI_ATTRIBUTE_INDOOR                     = 15,
      // Add more attribute here
     ANDR_WIFI_ATTRIBUTE_MAX
 } wifi_attr_t;
@@ -341,6 +343,7 @@ wifi_error init_wifi_vendor_hal_func_table(wifi_hal_fn *fn)
     fn->wifi_get_usable_channels = wifi_get_usable_channels;
     fn->wifi_trigger_subsystem_restart = wifi_trigger_subsystem_restart;
     fn->wifi_get_supported_radio_combinations_matrix = wifi_get_supported_radio_combinations_matrix;
+    fn->wifi_set_indoor_state = wifi_set_indoor_state;
 
     return WIFI_SUCCESS;
 }
@@ -1612,6 +1615,42 @@ public:
         return WIFI_SUCCESS;
     }
 };
+
+class SetIndoorCommand : public WifiCommand {
+       private:
+               bool mIndoor;
+       public:
+               SetIndoorCommand(wifi_interface_handle handle, bool isIndoor)
+                       : WifiCommand("SetIndoorCommand", handle, 0) {
+                               mIndoor = isIndoor;
+                       }
+
+               virtual int create() {
+                       int ret;
+
+                       if ((mIndoor != 0) &&
+                                       (mIndoor != 1)) {
+                               ALOGE("SetIndoorCommand: Invalid mode: %d", mIndoor);
+                               return WIFI_ERROR_UNKNOWN;
+                       }
+
+                       ret = mMsg.create(GOOGLE_OUI, WIFI_SUBCMD_CONFIG_INDOOR_STATE);
+                       if (ret < 0) {
+                               ALOGE("Can't create message to send to driver - %d", ret);
+                               return ret;
+                       }
+
+                       nlattr *data = mMsg.attr_start(NL80211_ATTR_VENDOR_DATA);
+                       ret = mMsg.put_u8(ANDR_WIFI_ATTRIBUTE_INDOOR, mIndoor);
+                       if (ret < 0) {
+                               return ret;
+                       }
+
+                       mMsg.attr_end(data);
+                       return WIFI_SUCCESS;
+               }
+};
+
 static int wifi_get_multicast_id(wifi_handle handle, const char *name, const char *group)
 {
     GetMulticastIdCommand cmd(handle, name, group);
@@ -1981,6 +2020,20 @@ static wifi_error wifi_configure_nd_offload(wifi_interface_handle handle, u8 ena
     SetNdoffloadCommand command(handle, enable);
     return (wifi_error) command.requestResponse();
 }
+
+wifi_error wifi_set_indoor_state(wifi_handle handle, bool isIndoor)
+{
+   ALOGD("Setting Wifi Indoor state, halHandle = %p isIndoor = %d\n", handle, isIndoor);
+   int numIfaceHandles = 0;
+   wifi_interface_handle *ifaceHandles = NULL;
+   wifi_interface_handle wlan0Handle;
+
+   wlan0Handle = wifi_get_wlan_interface((wifi_handle)handle, ifaceHandles, numIfaceHandles);
+
+   SetIndoorCommand command(wlan0Handle, isIndoor);
+   return (wifi_error) command.requestResponse();
+}
+
 wifi_error wifi_set_latency_mode(wifi_interface_handle handle, wifi_latency_mode mode)
 {
     ALOGD("Setting Wifi Latency mode, halHandle = %p LatencyMode = %d\n", handle, mode);
