@@ -178,7 +178,7 @@ protected:
             num_radios, (wifi_radio_stat *)radioStatsBuf);
         } else {
             /* To be deprecated, adding it to keep it backward compatible */
-            ALOGD("GetLinkStatCommand: zero radio case\n");
+            // ALOGD("GetLinkStatCommand: zero radio case\n");
             data = reply.get_vendor_data();
             if (!data) {
                 ALOGE("Invalid vendor data received\n");
