@@ -305,7 +305,7 @@ typedef enum {
     NAN_REQUEST_CONFIG                          = 8,
     NAN_REQUEST_TCA                             = 9,
     NAN_REQUEST_EVENT_CHECK                     = 10,
-    NAN_REQUEST_GET_CAPABILTIES                 = 11,
+    NAN_REQUEST_GET_CAPABILITIES                = 11,
     NAN_DATA_PATH_IFACE_CREATE                  = 12,
     NAN_DATA_PATH_IFACE_DELETE                  = 13,
     NAN_DATA_PATH_INIT_REQUEST                  = 14,
@@ -634,7 +634,7 @@ class NanDiscEnginePrimitive : public WifiCommand
         } else if (mType == NAN_REQUEST_TRANSMIT_FOLLOWUP) {
             return createTransmitFollowupRequest(request,
                     (NanTransmitFollowupRequest *)mParams);
-        } else if (mType == NAN_REQUEST_GET_CAPABILTIES) {
+        } else if (mType == NAN_REQUEST_GET_CAPABILITIES) {
             return getCapabilitiesRequest(request);
         } else {
             ALOGE("%s Unknown Nan request\n", __func__);
@@ -3678,7 +3678,7 @@ static const char *NanCmdToString(int cmd)
             C2S(NAN_REQUEST_CONFIG)
             C2S(NAN_REQUEST_TCA)
             C2S(NAN_REQUEST_EVENT_CHECK)
-            C2S(NAN_REQUEST_GET_CAPABILTIES)
+            C2S(NAN_REQUEST_GET_CAPABILITIES)
             C2S(NAN_DATA_PATH_IFACE_CREATE)
             C2S(NAN_DATA_PATH_IFACE_DELETE)
             C2S(NAN_DATA_PATH_INIT_REQUEST)
@@ -4550,9 +4550,9 @@ wifi_error nan_get_capabilities(transaction_id id, wifi_interface_handle iface)
 {
     wifi_error ret = WIFI_SUCCESS;
     wifi_handle handle = getWifiHandle(iface);
-    ALOGI("Get Nan Capabilties, id=%d, halHandle=%p\n", id, handle);
+    ALOGI("Get Nan Capabilities, id=%d, halHandle=%p\n", id, handle);
 
-    NanRequestType cmdType = NAN_REQUEST_GET_CAPABILTIES;
+    NanRequestType cmdType = NAN_REQUEST_GET_CAPABILITIES;
     NanDiscEnginePrimitive *cmd = new NanDiscEnginePrimitive(iface, id, NULL, cmdType);
     NULL_CHECK_RETURN(cmd, "memory allocation failure", WIFI_ERROR_OUT_OF_MEMORY);
 
