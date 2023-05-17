@@ -887,7 +887,7 @@ public:
 
     virtual int handleResponse(WifiEvent& reply) {
 
-        // ALOGI("handling reponse in %s", __func__);
+        // ALOGI("handling response in %s", __func__);
 
         struct nlattr **tb = reply.attributes();
         struct nlattr *mcgrp = NULL;
@@ -2902,7 +2902,7 @@ public:
         nlattr *data = mMsg.attr_start(NL80211_ATTR_VENDOR_DATA);
         ret = mMsg.put_u32(ANDR_WIFI_ATTRIBUTE_DTIM_MULTIPLIER, multiplier);
         if (ret < 0) {
-             ALOGE("Failed to set dtim mutiplier %d\n", multiplier);
+             ALOGE("Failed to set dtim multiplier %d\n", multiplier);
              return ret;
         }
 
