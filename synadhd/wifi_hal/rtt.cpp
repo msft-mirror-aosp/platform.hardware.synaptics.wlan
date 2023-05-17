@@ -81,7 +81,7 @@ typedef enum {
     RTT_ATTRIBUTE_RESULTS_PER_TARGET        = 31,
     RTT_ATTRIBUTE_RESULT_CNT                = 32,
     RTT_ATTRIBUTE_RESULT                    = 33,
-    RTT_ATTRIBUTE_RESUTL_DETAIL             = 34,
+    RTT_ATTRIBUTE_RESULT_DETAIL             = 34,
     /* Add any new RTT_ATTRIBUTE prior to RTT_ATTRIBUTE_MAX */
     RTT_ATTRIBUTE_MAX
 } RTT_ATTRIBUTE;
@@ -107,7 +107,7 @@ typedef struct dot11_rm_ie dot11_rm_ie_t;
 static const strmap_entry_t err_info[] = {
     {RTT_STATUS_SUCCESS, String8("Success")},
     {RTT_STATUS_FAILURE, String8("Failure")},
-    {RTT_STATUS_FAIL_NO_RSP, String8("No reponse")},
+    {RTT_STATUS_FAIL_NO_RSP, String8("No response")},
     {RTT_STATUS_FAIL_INVALID_TS, String8("Invalid Timestamp")},
     {RTT_STATUS_FAIL_PROTOCOL, String8("Protocol error")},
     {RTT_STATUS_FAIL_REJECTED, String8("Rejected")},
@@ -148,7 +148,7 @@ public:
     }
 
     virtual int create() {
-        ALOGD("Creating message to get scan capablities; iface = %d", mIfaceInfo->id);
+        ALOGD("Creating message to get scan capabilities; iface = %d", mIfaceInfo->id);
 
         int ret = mMsg.create(GOOGLE_OUI, RTT_SUBCMD_GETCAPABILITY);
         if (ret < 0) {
@@ -556,7 +556,7 @@ public:
                 for (nl_iterator it2(it.get()); it2.has_next(); it2.next()) {
                     if (it2.get_type() == RTT_ATTRIBUTE_TARGET_MAC) {
                         memcpy(bssid, it2.get_data(), sizeof(mac_addr));
-                        ALOGI("retrived target mac : %02x:%02x:%02x:%02x:%02x:%02x\n",
+                        ALOGI("retrieved target mac : %02x:%02x:%02x:%02x:%02x:%02x\n",
                                 bssid[0],
                                 bssid[1],
                                 bssid[2],
@@ -609,16 +609,18 @@ public:
                             }
                         }
                         totalCnt++;
-                        ALOGI("retrived rtt_result : \n\tburst_num :%d, measurement_number : %d, success_number : %d\n"
-                                "\tnumber_per_burst_peer : %d, status : %s, retry_after_duration : %d s\n"
-				"\trssi : %d dbm, rx_rate : %d Kbps, rtt : %lu ns, rtt_sd : %lu\n"
-				"\tdistance : %d cm, burst_duration : %d ms, negotiated_burst_num : %d\n",
+                        ALOGI("retrieved rtt_result : \n\tburst_num :%d, measurement_number : %d,"
+                                "success_number : %d\n\tnumber_per_burst_peer : %d, status : %s,"
+                                "retry_after_duration : %d s\n\trssi : %d dbm, rx_rate : %d Kbps,"
+                                "rtt : %lu ns, rtt_sd : %lu\n\tdistance : %d cm, burst_duration"
+                                ": %d ms, negotiated_burst_num : %d\n",
                                 rtt_result->burst_num, rtt_result->measurement_number,
                                 rtt_result->success_number, rtt_result->number_per_burst_peer,
                                 get_err_info(rtt_result->status), rtt_result->retry_after_duration,
                                 rtt_result->rssi, rtt_result->rx_rate.bitrate * 100,
-				(unsigned long)rtt_result->rtt/1000, (unsigned long)rtt_result->rtt_sd,
-			       	rtt_result->distance_mm / 10,
+                                (unsigned long)rtt_result->rtt/1000,
+                                (unsigned long)rtt_result->rtt_sd,
+                                rtt_result->distance_mm / 10,
                                 rtt_result->burst_duration, rtt_result->negotiated_burst_num);
                         currentIdx++;
                     }
