@@ -209,7 +209,7 @@ class GetCapabilitiesCommand : public WifiCommand
     }
 
     virtual int create() {
-        ALOGV("Creating message to get scan capablities; iface = %d", mIfaceInfo->id);
+        ALOGV("Creating message to get scan capabilities; iface = %d", mIfaceInfo->id);
 
         int ret = mMsg.create(GOOGLE_OUI, mRequesttype);
         if (ret < 0) {
