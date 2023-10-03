@@ -66,6 +66,24 @@ typedef struct {
 	wifi_channel_stat channels[];
 } wifi_radio_stat_internal;
 
+typedef struct {
+   wifi_radio radio;       // wifi radio (if multiple radio supported)
+   u32 on_time;            // msecs the radio is awake
+   u32 tx_time;            // msecs the radio is transmitting
+   u32 num_tx_levels;      // number of radio transmit power levels
+   u64 tx_time_per_levels; // pointer to an array of radio transmit per power levels in
+                           // msecs accured over time
+   u32 rx_time;            // msecs the radio is in active receive
+   u32 on_time_scan;       // msecs the radio is awake due to all scan
+   u32 on_time_nbd;        // msecs the radio is awake due to NAN
+   u32 on_time_gscan;      // msecs the radio is awake due to G scan
+   u32 on_time_roam_scan;  // msecs the radio is awake due to roam scan
+   u32 on_time_pno_scan;   // msecs the radio is awake due to PNO scan
+   u32 on_time_hs20;       // msecs the radio is awake due to HS2.0 scans and GAS exchange
+   u32 num_channels;       // number of channels
+   wifi_channel_stat channels[]; // channel statistics
+} wifi_radio_stat_internal_v2;
+
 enum {
     LSTATS_SUBCMD_GET_INFO = ANDROID_NL80211_SUBCMD_LSTATS_RANGE_START,
 };
@@ -157,7 +175,7 @@ protected:
                     goto exit;
                 }
                 radio_stat_ptr =
-                    convertToExternalRadioStatStructure((wifi_radio_stat*)data_ptr,
+                    convertToExternalRadioStatStructure((wifi_radio_stat_internal_v2*)data_ptr,
                         &per_radio_size);
                 if (!radio_stat_ptr || !per_radio_size) {
                     ALOGE("No data for radio %d\n", i);
@@ -216,14 +234,15 @@ exit:
     }
 
 private:
-    wifi_radio_stat *convertToExternalRadioStatStructure(wifi_radio_stat *internal_stat_ptr,
-        uint32_t *per_radio_size) {
+        wifi_radio_stat *convertToExternalRadioStatStructure(
+                          wifi_radio_stat_internal_v2 *internal_stat_ptr,
+                          uint32_t *per_radio_size) {
         wifi_radio_stat *external_stat_ptr = NULL;
         if (!internal_stat_ptr) {
             ALOGE("Incoming data is null\n");
         } else {
             uint32_t channel_size = internal_stat_ptr->num_channels * sizeof(wifi_channel_stat);
-            *per_radio_size = offsetof(wifi_radio_stat, channels) + channel_size;
+            *per_radio_size = offsetof(wifi_radio_stat_internal_v2, channels) + channel_size;
             external_stat_ptr = (wifi_radio_stat *)malloc(*per_radio_size);
             if (external_stat_ptr) {
                 external_stat_ptr->radio = internal_stat_ptr->radio;
