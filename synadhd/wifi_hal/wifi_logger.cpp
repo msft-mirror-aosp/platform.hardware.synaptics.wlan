@@ -2365,14 +2365,14 @@ public:
         ALOGI("Id = %0x, subcmd = %d, len = %d", id, subcmd, len);
 
         if (mReqType == TX_PACKET_FATE) {
-            ALOGI("Response recieved for get TX pkt fate command\n");
+            ALOGI("Response received for get TX pkt fate command\n");
         } else if (mReqType == RX_PACKET_FATE) {
-            ALOGI("Response recieved for get RX pkt fate command\n");
+            ALOGI("Response received for get RX pkt fate command\n");
         } else if (mReqType == PACKET_MONITOR_START) {
-            ALOGI("Response recieved for monitor pkt fate command\n");
+            ALOGI("Response received for monitor pkt fate command\n");
             return NL_OK;
         } else {
-            ALOGE("Response recieved for unknown pkt fate command\n");
+            ALOGE("Response received for unknown pkt fate command\n");
             return NL_SKIP;
         }
 
