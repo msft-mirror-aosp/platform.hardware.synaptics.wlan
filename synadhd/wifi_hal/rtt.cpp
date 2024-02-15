@@ -43,7 +43,7 @@
 #include <log/log.h>
 #include <utils/String8.h>
 
-#include "wifi_hal.h"
+#include <hardware_legacy/wifi_hal.h>
 #include "common.h"
 #include "cpp_bindings.h"
 
@@ -138,7 +138,7 @@ get_err_info(int status)
     for (i = 0; i < (int) num_entries; i++)
     {
         if (p_entry->id == status)
-            return p_entry->text;
+            return p_entry->text.c_str();
         p_entry++;		/* next entry */
     }
     return "unknown error";			/* not found */
