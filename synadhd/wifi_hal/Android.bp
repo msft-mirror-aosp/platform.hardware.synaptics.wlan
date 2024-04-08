@@ -60,10 +60,10 @@ cc_library_static {
     ],
 
     header_libs: [
-        "libhardware_legacy_headers",
         "liblog_headers",
         "libnetlink_iface_headers",
         "libutils_headers",
+        "wifi_legacy_headers",
     ],
 
     shared_libs: [
