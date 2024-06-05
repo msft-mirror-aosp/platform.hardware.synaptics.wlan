@@ -31,8 +31,6 @@
 #include <netlink/object-api.h>
 #include <netlink/netlink.h>
 #include <netlink/socket.h>
-#include <netlink-private/object-api.h>
-#include <netlink-private/types.h>
 
 #include "nl80211_copy.h"
 
@@ -43,7 +41,7 @@
 #include <log/log.h>
 #include <utils/String8.h>
 
-#include "wifi_hal.h"
+#include <hardware_legacy/wifi_hal.h>
 #include "common.h"
 #include "cpp_bindings.h"
 
@@ -138,7 +136,7 @@ get_err_info(int status)
     for (i = 0; i < (int) num_entries; i++)
     {
         if (p_entry->id == status)
-            return p_entry->text;
+            return p_entry->text.c_str();
         p_entry++;		/* next entry */
     }
     return "unknown error";			/* not found */
