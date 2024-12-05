@@ -1205,6 +1205,7 @@ class AndroidPktFilterCommand : public WifiCommand {
         {
             mProgram = NULL;
             mProgramLen = 0;
+            mReadProgram = NULL;
         }
 
         AndroidPktFilterCommand(wifi_interface_handle handle,
@@ -1215,6 +1216,7 @@ class AndroidPktFilterCommand : public WifiCommand {
         {
             mVersion = NULL;
             mMaxLen = NULL;
+            mReadProgram = NULL;
         }
 
         AndroidPktFilterCommand(wifi_interface_handle handle,
@@ -1223,20 +1225,23 @@ class AndroidPktFilterCommand : public WifiCommand {
                 mReadProgram(host_dst), mProgramLen(length),
                 mReqType(READ_APF_PROGRAM)
         {
+            mProgram = NULL;
+            mVersion = NULL;
+            mMaxLen = NULL;
         }
 
     int createRequest(WifiRequest& request) {
         if (mReqType == SET_APF_PROGRAM) {
-            ALOGI("\n%s: APF set program request\n", __FUNCTION__);
+            ALOGI("%s: APF set program request\n", __FUNCTION__);
             return createSetPktFilterRequest(request);
         } else if (mReqType == GET_APF_CAPABILITIES) {
-            ALOGI("\n%s: APF get capabilities request\n", __FUNCTION__);
+            ALOGI("%s: APF get capabilities request\n", __FUNCTION__);
 	    return createGetPktFilterCapabilitesRequest(request);
         } else if (mReqType == READ_APF_PROGRAM) {
-            ALOGI("\n%s: APF read packet filter request\n", __FUNCTION__);
+            ALOGI("%s: APF read packet filter request\n", __FUNCTION__);
             return createReadPktFilterRequest(request);
         } else {
-            ALOGE("\n%s Unknown APF request\n", __FUNCTION__);
+            ALOGE("%s Unknown APF request\n", __FUNCTION__);
             return WIFI_ERROR_NOT_SUPPORTED;
         }
         return WIFI_SUCCESS;
@@ -1244,9 +1249,19 @@ class AndroidPktFilterCommand : public WifiCommand {
 
     int createSetPktFilterRequest(WifiRequest& request) {
         u8 *program = new u8[mProgramLen];
+        int result;
+
         NULL_CHECK_RETURN(program, "memory allocation failure", WIFI_ERROR_OUT_OF_MEMORY);
-        int result = request.create(GOOGLE_OUI, APF_SUBCMD_SET_FILTER);
+
+        ALOGI("mProgramLen : %d\n", mProgramLen);
+        if (mProgramLen > NL_MSG_DEFAULT_LEN) {
+            result = request.create_custom_len(GOOGLE_OUI, APF_SUBCMD_SET_FILTER,
+                    NL_MSG_MAX_LEN);
+        } else {
+            result = request.create(GOOGLE_OUI, APF_SUBCMD_SET_FILTER);
+        }
         if (result < 0) {
+            ALOGE("Failed to create cmd: %d, err %d\n", APF_SUBCMD_SET_FILTER, result);
             delete[] program;
             return result;
         }
@@ -1254,11 +1269,13 @@ class AndroidPktFilterCommand : public WifiCommand {
         nlattr *data = request.attr_start(NL80211_ATTR_VENDOR_DATA);
         result = request.put_u32(APF_ATTRIBUTE_PROGRAM_LEN, mProgramLen);
         if (result < 0) {
+            ALOGE("Failed to put the program_len %d, err %d\n", mProgramLen, result);
             goto exit;
         }
         memcpy(program, mProgram, mProgramLen);
         result = request.put(APF_ATTRIBUTE_PROGRAM, program, mProgramLen);
         if (result < 0) {
+            ALOGE("Failed to copy program_ptr %d, err %d\n", mProgramLen, result);
             goto exit;
         }
 exit:   request.attr_end(data);
@@ -1291,6 +1308,7 @@ exit:   request.attr_end(data);
         WifiRequest request(familyId(), ifaceId());
         int result = createRequest(request);
         if (result < 0) {
+            ALOGI("CreateRequest failed for APF, result = %d", result);
             return result;
         }
         result = requestResponse(request);
@@ -1298,7 +1316,6 @@ exit:   request.attr_end(data);
             ALOGI("Request Response failed for APF, result = %d", result);
             return result;
         }
-        ALOGI("Done!");
         return result;
     }
 
@@ -1307,7 +1324,7 @@ exit:   request.attr_end(data);
     }
 
     int handleResponse(WifiEvent& reply) {
-        ALOGD("In SetAPFCommand::handleResponse");
+        ALOGE("In SetAPFCommand::handleResponse mReqType %d\n", mReqType);
 
         if (reply.get_cmd() != NL80211_CMD_VENDOR) {
             ALOGD("Ignoring reply with cmd = %d", reply.get_cmd());
@@ -1320,13 +1337,13 @@ exit:   request.attr_end(data);
         nlattr *vendor_data = reply.get_attribute(NL80211_ATTR_VENDOR_DATA);
         int len = reply.get_vendor_data_len();
 
-        ALOGD("Id = %0x, subcmd = %d, len = %d", id, subcmd, len);
+        ALOGI("Id = %0x, subcmd = %d, len = %d", id, subcmd, len);
         if (vendor_data == NULL || len == 0) {
             ALOGE("no vendor data in SetAPFCommand response; ignoring it");
             return NL_SKIP;
         }
-        if( mReqType == SET_APF_PROGRAM) {
-            ALOGD("Response received for set packet filter command\n");
+        if (mReqType == SET_APF_PROGRAM) {
+            ALOGE("Response received for set packet filter command\n");
         } else if (mReqType == GET_APF_CAPABILITIES) {
             *mVersion = 0;
             *mMaxLen = 0;
