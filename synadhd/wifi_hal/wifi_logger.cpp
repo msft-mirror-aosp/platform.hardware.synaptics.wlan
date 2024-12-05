@@ -1647,8 +1647,12 @@ public:
     }
     RingDump(wifi_interface_handle iface, int id)
         : WifiCommand("RingDump", iface, id), mLargestBuffSize(0), mBuff(NULL),
-        mErrCode(0)
+        mErrCode(0), mMap(NULL), mNumMaps(0)
     {
+        memset(&mHandle, 0, sizeof(wifi_ring_buffer_data_handler));
+        for (int i = 0; i < DUMP_BUF_ATTR_MAX; i++) {
+            ring_name[i] = NULL;
+        }
     }
 
     int start() {
