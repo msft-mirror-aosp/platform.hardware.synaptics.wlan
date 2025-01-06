@@ -60,6 +60,17 @@ const uint32_t BRCM_OUI =  0x001018;
 #define MAX_NUM_RADIOS 3
 #define MAX_CMD_RESP_BUF_LEN 8192
 
+#define NL_MSG_MAX_LEN                  5120u
+
+/* nl_msg->nm_nlh->nlmsg_len is added by data len of the attributes
+ * NL80211_ATTR_VENDOR_ID, NL80211_ATTR_VENDOR_SUBCMD,
+ * NL80211_ATTR_IFINDEX, APF_PROGRAM_LEN by 56u
+ * To keep the additioanl room and aligned,
+ * keeping the overhead of 128u
+ */
+#define NL_MSG_HDR_OVERHEAD_LEN		128u
+#define NL_MSG_DEFAULT_LEN		(getpagesize() - NL_MSG_HDR_OVERHEAD_LEN)
+
 /*
  This enum defines ranges for various commands; commands themselves
  can be defined in respective feature headers; i.e. find gscan command
