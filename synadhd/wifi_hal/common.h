@@ -61,6 +61,7 @@ const uint32_t BRCM_OUI =  0x001018;
 #define MAX_CMD_RESP_BUF_LEN 8192
 
 #define NL_MSG_MAX_LEN                  5120u
+#define NAN_DEFAULT_RX_CHAINS_SUPPORTED 2u
 
 /* nl_msg->nm_nlh->nlmsg_len is added by data len of the attributes
  * NL80211_ATTR_VENDOR_ID, NL80211_ATTR_VENDOR_SUBCMD,
